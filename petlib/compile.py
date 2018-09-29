@@ -59,6 +59,7 @@ _FFI.set_source("petlib._petlib","""
 #include <openssl/x509.h>
 #include <openssl/x509_vfy.h>
 #include <openssl/crypto.h>
+#include <openssl/conf.h>
 
 
 #include <pythread.h>
@@ -74,22 +75,22 @@ int bn_is_odd(BIGNUM * a){
     return BN_is_odd(a);
 }
 
-size_t hmac_ctx_size(void){
-    return sizeof(HMAC_CTX);
-}
+//size_t hmac_ctx_size(void){
+ //    return sizeof(HMAC_CTX);
+// }
 
 
-extern void ERR_load_crypto_strings(void);
-extern void OPENSSL_config(void*);
-extern void ERR_free_strings(void);
+// extern void ERR_load_crypto_strings(void);
+// extern void OPENSSL_config(void*);
+// extern void ERR_free_strings(void);
 
 void init_ciphers(void){
 
     /* Load the human readable error strings for libcrypto */
-    ERR_load_crypto_strings();
+    // ERR_load_crypto_strings();
 
     /* Load all digest and cipher algorithms */
-    OpenSSL_add_all_algorithms();
+    // OpenSSL_add_all_algorithms();
 
     /* Load config file, and other important initialisation */
     OPENSSL_config(NULL);
@@ -105,7 +106,7 @@ void cleanup_ciphers(void){
     CRYPTO_cleanup_all_ex_data();
 
     /* Remove error strings */
-    ERR_free_strings();
+    // ERR_free_strings();
 
 }
 
@@ -148,32 +149,8 @@ static void _ssl_thread_locking_function(int mode, int n, const char *file,
     }
 }
 
-int setup_ssl_threads() {
-    unsigned int i;
-
-    if (_ssl_locks == NULL) {
-        _ssl_locks_count = CRYPTO_num_locks();
-        _ssl_locks = PyMem_New(PyThread_type_lock, _ssl_locks_count);
-        if (_ssl_locks == NULL) {
-            PyErr_NoMemory();
-            return 0;
-        }
-        memset(_ssl_locks, 0, sizeof(PyThread_type_lock) * _ssl_locks_count);
-        for (i = 0;  i < _ssl_locks_count;  i++) {
-            _ssl_locks[i] = PyThread_allocate_lock();
-            if (_ssl_locks[i] == NULL) {
-                unsigned int j;
-                for (j = 0;  j < i;  j++) {
-                    PyThread_free_lock(_ssl_locks[j]);
-                }
-                PyMem_Free(_ssl_locks);
-                return 0;
-            }
-        }
-        CRYPTO_set_locking_callback(_ssl_thread_locking_function);
-    }
-    return 1;
-}
+// https://github.com/pyca/cryptography/commit/bc1667791eedfe9d77d56dd9014e26481f571ff5
+int (*setup_ssl_threads)(void) = NULL;
 
     """, libraries=libraries, 
     extra_compile_args=extra_compile_args, 
@@ -205,12 +182,12 @@ typedef enum foo {
 /* Locking functions */
 
 int CRYPTO_num_locks(void);
-void CRYPTO_lock(int mode, int type, const char *file, int line);
-void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char *file, int line));
-void (*CRYPTO_get_locking_callback(void)) (int mode, int type, const char *file, int line);
-void CRYPTO_set_add_lock_callback(int (*func) (int *num, int mount, int type,
-                                    const char *file, int line));
-int (*CRYPTO_get_add_lock_callback(void)) (int *num, int mount, int type, const char *file, int line);
+// void CRYPTO_lock(int mode, int type, const char *file, int line);
+// void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char *file, int line));
+// void (*CRYPTO_get_locking_callback(void)) (int mode, int type, const char *file, int line);
+// void CRYPTO_set_add_lock_callback(int (*func) (int *num, int mount, int type,
+//                                    const char *file, int line));
+// int (*CRYPTO_get_add_lock_callback(void)) (int *num, int mount, int type, const char *file, int line);
 
 
 /* 
@@ -291,7 +268,7 @@ BN_CTX *BN_CTX_new(void);
 void    BN_CTX_free(BN_CTX *c);
 
 BIGNUM* BN_new(void);
-void    BN_init(BIGNUM *);
+// void    BN_init(BIGNUM *);
 void    BN_clear_free(BIGNUM *a);
 BIGNUM* BN_copy(BIGNUM *a, const BIGNUM *b);
 void    BN_swap(BIGNUM *a, BIGNUM *b);
@@ -348,28 +325,30 @@ int BN_is_bit_set(const BIGNUM *a, int n);
 
 */
 
-typedef struct evp_cipher_st
-{
-    int nid;
-    int block_size;
-    int key_len; /* Default value for variable length ciphers */
-    int iv_len;
-    unsigned long flags; /* Various flags */
-    ...;
-} EVP_CIPHER;
+// typedef struct evp_cipher_st
+// {
+    // int nid;
+    // int block_size;
+    // int key_len; /* Default value for variable length ciphers */
+    // int iv_len;
+    // unsigned long flags; /* Various flags */
+    // ...;
+// } EVP_CIPHER;
+typedef ... EVP_CIPHER;
 
-typedef struct evp_cipher_ctx_st
-{
-    const EVP_CIPHER *cipher;
-    int encrypt; /* encrypt or decrypt */
-    int buf_len; /* number we have left */
-    int num; /* used by cfb/ofb/ctr mode */
-    int key_len; /* May change for variable length cipher */
-    unsigned long flags; /* Various flags */
-    int final_used;
-    int block_mask;
-    ...;
-} EVP_CIPHER_CTX;
+// typedef struct evp_cipher_ctx_st
+// {
+    // const EVP_CIPHER *cipher;
+    // int encrypt; /* encrypt or decrypt */
+    // int buf_len; /* number we have left */
+    // int num; /* used by cfb/ofb/ctr mode */
+    // int key_len; /* May change for variable length cipher */
+    // unsigned long flags; /* Various flags */
+    // int final_used;
+    // int block_mask;
+    // ...;
+// } EVP_CIPHER_CTX;
+typedef ... EVP_CIPHER_CTX;
 
 const EVP_CIPHER * EVP_aes_128_gcm(void);
 const EVP_CIPHER * EVP_aes_192_gcm(void);
@@ -423,6 +402,14 @@ int  EVP_CipherFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);
 #define EVP_CTRL_AEAD_SET_MAC_KEY ...
 #define EVP_CTRL_GCM_SET_IV_INV ...
 
+ int EVP_CIPHER_nid(const EVP_CIPHER *e);
+ int EVP_CIPHER_block_size(const EVP_CIPHER *e);
+ int EVP_CIPHER_key_length(const EVP_CIPHER *e);
+ int EVP_CIPHER_iv_length(const EVP_CIPHER *e);
+ unsigned long EVP_CIPHER_flags(const EVP_CIPHER *e);
+ unsigned long EVP_CIPHER_mode(const EVP_CIPHER *e);
+ int EVP_CIPHER_type(const EVP_CIPHER *ctx);
+
  int EVP_EncryptInit_ex(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
                  ENGINE *impl, unsigned char *key, unsigned char *iv);
  int EVP_EncryptUpdate(EVP_CIPHER_CTX *ctx, unsigned char *out,
@@ -439,39 +426,47 @@ int  EVP_CipherFinal_ex(EVP_CIPHER_CTX *ctx, unsigned char *outm, int *outl);
 
 void init_ciphers();
 void cleanup_ciphers();
-int setup_ssl_threads();
+int setup_ssl_threads(void);
 
 // The HMAC interface
 
 
-typedef struct { ...; } HMAC_CTX;
+// typedef struct { ...; } HMAC_CTX;
+typedef ... HMAC_CTX;
 typedef ... EVP_MD;
 
-size_t hmac_ctx_size();
+// size_t hmac_ctx_size();
 
 int EVP_MD_size(const EVP_MD *md);
 int EVP_MD_block_size(const EVP_MD *md);
 const EVP_MD *EVP_get_digestbyname(const char *name);
 
 
- void HMAC_CTX_init(HMAC_CTX *ctx);
+ // void HMAC_CTX_init(HMAC_CTX *ctx);
+ HMAC_CTX *HMAC_CTX_new(void);
+ int HMAC_CTX_reset(HMAC_CTX *ctx);
 
  int HMAC_Init_ex(HMAC_CTX *ctx, const void *key, int key_len,
                                      const EVP_MD *md, ENGINE *impl);
  int HMAC_Update(HMAC_CTX *ctx, const unsigned char *data, int len);
  int HMAC_Final(HMAC_CTX *ctx, unsigned char *md, unsigned int *len);
 
- void HMAC_CTX_cleanup(HMAC_CTX *ctx);
+ void HMAC_CTX_free(HMAC_CTX *ctx);
+ // void HMAC_CTX_cleanup(HMAC_CTX *ctx);
  
 
 // The ECDSA interface
 
 
-typedef struct ECDSA_SIG_st
-{
-    BIGNUM * r;
-    BIGNUM * s;
-} ECDSA_SIG;
+// typedef struct ECDSA_SIG_st
+// {
+    // BIGNUM * r;
+    // BIGNUM * s;
+// } ECDSA_SIG;
+typedef ... ECDSA_SIG;
+
+void ECDSA_SIG_get0(const ECDSA_SIG *sig, const BIGNUM **pr, const BIGNUM **ps);
+int ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s);
 
 typedef ... EC_KEY; 
 

@@ -4,6 +4,8 @@ import os
 import platform
 import cffi
 
+from ._petlib import ffi, lib
+
 try:
     from ._petlib import ffi, lib
     _FFI = ffi
@@ -57,8 +59,8 @@ class InitCiphers(object):
 
 if _C and _FFI:
     _ciphers = InitCiphers()
-    if _C.CRYPTO_get_locking_callback() == _FFI.NULL:
-        _C.setup_ssl_threads()
+    # if _C.CRYPTO_get_locking_callback() == _FFI.NULL:
+    #    _C.setup_ssl_threads()
 
 
 def test_double_load():
@@ -73,8 +75,8 @@ def test_version():
 def test_errors():
     assert get_errors() == []
 
-def test_locks():
-    assert _C.CRYPTO_get_locking_callback() != _FFI.NULL
+#def test_locks():
+#    assert _C.CRYPTO_get_locking_callback() != _FFI.NULL
 
 def test_multithread():
     import threading

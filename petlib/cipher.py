@@ -98,7 +98,7 @@ class Cipher(object):
             c_op = self._pool.pop()
             c_op.init(enc)
 
-        ok &= ( len(key) == int(self.alg.key_len) )
+        ok &= ( len(key) == int(_C.EVP_CIPHER_key_length(self.alg)) )
         ok &= ( enc == 0 or enc == 1 )
 
         if not ok: raise Exception("Cipher exception: Wrong key length or enc mode.")
