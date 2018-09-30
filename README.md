@@ -45,3 +45,12 @@ You may use 'setuptools' and 'tox' to build and test the library:
 To run all tests simply do:
 
 	tox
+
+Local install
+-------------
+
+You can also use setuptools to install this library locally. Just run:
+
+    python setup.py install
+
+If you want to install petlib in your virtual environment (I would recommend that), make sure to enable setup venv/virtual env before running the above command.
