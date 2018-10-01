@@ -5,15 +5,19 @@ import platform
 import cffi
 
 from ._petlib import ffi, lib
+from ._compat import get_openssl_version_code
+from ._compat import OPENSSL_VERSION_1_0, OPENSSL_VERSION_1_1
 
 try:
     from ._petlib import ffi, lib
     _FFI = ffi
     _C = lib
+    _OPENSSL_VERSION = get_openssl_version_code()
 except:
     print("Support not loading the library to build docs without compiling.")
     _C = None
     _FFI = None
+    _OPENSSL_VERSION = None
 
 
 # Store constants
@@ -96,5 +100,5 @@ def test_multithread():
     for i in range(100):
         t = threading.Thread(target=worker)
         threads.append(t)
-        t.start()    
+        t.start()
 
