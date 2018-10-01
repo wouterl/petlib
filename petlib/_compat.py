@@ -7,36 +7,32 @@ class OpenSSLVersion:
     V1_1 = "1_1"
 
 
-def _try_get_lib():
-    try:
-        from .bindings import _C
-    except (ImportError, ValueError):
-        pass
-
+def get_abi_lib():
     ffi = cffi.FFI()
-    ffi.cdef("long SSLeay(void);")
+    ffi.cdef("unsigned long SSLeay();")
     ffi.cdef("unsigned long OpenSSL_version_num();")
-    _C = ffi.dlopen("crypto")
-    return _C
+    lib = ffi.dlopen("crypto")
+    return lib
 
 
-def get_openssl_version(warn=False):
+def get_openssl_version(lib=None, warn=False):
     """Returns the OpenSSL version that is used for bindings."""
 
-    lib = _try_get_lib()
+    if lib is None:
+        lib = get_abi_lib()
+
     try:
-        version = lib.OpenSSL_version_num() >> 20
+        full_version = lib.OpenSSL_version_num()
     except AttributeError:
-        version = lib.SSleay() >> 20
+        full_version = lib.SSLeay()
 
-    print(hex(version))
-
+    version = full_version >> 20
     if version == 0x101:
         return OpenSSLVersion.V1_1
     elif version == 0x100:
         if warn:
             warnings.warn(
-                    "Support for the system OpenSSL version (%d) is pending deprecation. "
+                    "Support for the system OpenSSL version (0x%x) is pending deprecation. "
                     "Please upgrade to OpenSSL v1.1" % version)
         return OpenSSLVersion.V1_0
     else:

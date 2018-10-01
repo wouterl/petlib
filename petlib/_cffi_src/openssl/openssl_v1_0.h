@@ -318,7 +318,9 @@ int EC_KEY_set_public_key(EC_KEY *key, const EC_POINT *pub);
 int EC_KEY_precompute_mult(EC_KEY *key, BN_CTX *ctx);
 
 #define SSLEAY_VERSION ...
-const char *SSLeay_version(int type);
+
+unsigned long SSLeay();
+/* const char *SSLeay_version(int type); */
 
 unsigned long ERR_get_error(void);
 

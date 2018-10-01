@@ -124,4 +124,3 @@ int setup_ssl_threads() {
     }
     return 1;
 }
-

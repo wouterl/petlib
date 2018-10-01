@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
+import os
+import platform
+import cffi
+
 try:
     from ._petlib import ffi, lib
-    from ._compat import get_openssl_version, OpenSSLVersion  # pylint: disable=unused-import
     _FFI = ffi
     _C = lib
-    _OPENSSL_VERSION = get_openssl_version()
+
+    from ._compat import get_openssl_version, OpenSSLVersion  # pylint: disable=unused-import
+    _OPENSSL_VERSION = get_openssl_version(_C)
+
 except:
     print("Support not loading the library to build docs without compiling.")
     _C = None
