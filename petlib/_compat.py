@@ -1,4 +1,4 @@
-import ssl
+import cffi
 import warnings
 
 
@@ -9,11 +9,14 @@ OPENSSL_VERSION_1_1 = "1_1"
 def get_openssl_version_code(warn=False):
     """Returns system OpenSSL version code."""
 
-    version_info = ssl.OPENSSL_VERSION_INFO
-    major, minor = version_info[0], version_info[1]
-    if major == 1 and minor == 1:
+    ffi = cffi.FFI()
+    ffi.cdef("unsigned long OpenSSL_version_num();")
+    lib = ffi.dlopen("crypto")
+    version = lib.OpenSSL_version_num() >> 20
+
+    if version == 0x101:
         return OPENSSL_VERSION_1_1
-    elif major == 1 and minor == 0:
+    elif version == 0x100:
         return OPENSSL_VERSION_1_0
     else:
         # If the version is not 1.0 or 1.1, assume its a later one, and optimistically
