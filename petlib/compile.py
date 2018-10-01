@@ -7,12 +7,12 @@ import cffi
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 OPENSSL_BINDINGS_PATH = os.path.join(CURRENT_PATH, '_cffi_src/openssl')
-COMPAT_FILE = os.path.join(CURRENT_PATH, '_compat.py')
+COMPAT_FILE_PATH = os.path.join(CURRENT_PATH, '_compat.py')
 
 
 # Load the OpenSSL version utility.
-with open(COMPAT_FILE) as f:
-    exec(f.read())
+with open(COMPAT_FILE_PATH) as compat_file:
+    exec(compat_file.read())  # pylint: disable=exec-used
 
 
 if platform.system() == "Windows":
@@ -57,12 +57,12 @@ else:
 
 
 def get_openssl_bindings(filename):
-    code_path = os.path.join(OPENSSL_BINDINGS_PATH, filename)
-    with open(code_path) as f:
-        return f.read()
+    src_path = os.path.join(OPENSSL_BINDINGS_PATH, filename)
+    with open(src_path) as src_file:
+        return src_file.read()
 
 
-openssl_version_code = get_openssl_version_code(warn=True)
+openssl_version_code = get_openssl_version(warn=True)  # pylint: disable=undefined-variable
 openssl_bindings_defs = get_openssl_bindings(
         'openssl_v%s.h' % openssl_version_code)
 openssl_bindings_src = get_openssl_bindings(
