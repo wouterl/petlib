@@ -5,8 +5,8 @@
 void OPENSSL_init(void);
 void OPENSSL_free(void*);
 
- // The constant-time compare functions
- int CRYPTO_memcmp(const void *a, const void *b, size_t len);
+// The constant-time compare functions
+int CRYPTO_memcmp(const void *a, const void *b, size_t len);
 
 typedef enum foo {
      /* values as defined in X9.62 (ECDSA) and elsewhere */
@@ -19,13 +19,6 @@ typedef enum foo {
 /* Locking functions */
 
 int CRYPTO_num_locks(void);
-// void CRYPTO_lock(int mode, int type, const char *file, int line);
-// void CRYPTO_set_locking_callback(void (*func) (int mode, int type, const char *file, int line));
-// void (*CRYPTO_get_locking_callback(void)) (int mode, int type, const char *file, int line);
-// void CRYPTO_set_add_lock_callback(int (*func) (int *num, int mount, int type,
-//                                    const char *file, int line));
-// int (*CRYPTO_get_add_lock_callback(void)) (int *num, int mount, int type, const char *file, int line);
-
 
 /*
     ECC OpenSSL functions.
@@ -73,9 +66,7 @@ int EC_POINTs_make_affine(const EC_GROUP *, size_t num, EC_POINT *[], BN_CTX *);
 int EC_POINTs_mul(const EC_GROUP *, EC_POINT *r, const BIGNUM *, size_t num, const EC_POINT *[], const BIGNUM *[], BN_CTX *);
 int EC_POINT_mul(const EC_GROUP *, EC_POINT *r, const BIGNUM *, const EC_POINT *, const BIGNUM *, BN_CTX *);
 
-/* EC_GROUP_precompute_mult() stores multiples of generator for faster point multiplication */
 int EC_GROUP_precompute_mult(EC_GROUP *, BN_CTX *);
-/* EC_GROUP_have_precompute_mult() reports whether such precomputation has been done */
 int EC_GROUP_have_precompute_mult(const EC_GROUP *);
 
 int EC_POINT_get_affine_coordinates_GFp(const EC_GROUP *group,
@@ -105,7 +96,6 @@ BN_CTX *BN_CTX_new(void);
 void    BN_CTX_free(BN_CTX *c);
 
 BIGNUM* BN_new(void);
-// void    BN_init(BIGNUM *);
 void    BN_clear_free(BIGNUM *a);
 BIGNUM* BN_copy(BIGNUM *a, const BIGNUM *b);
 void    BN_swap(BIGNUM *a, BIGNUM *b);
@@ -125,13 +115,13 @@ int     BN_exp(BIGNUM *r, const BIGNUM *a, const BIGNUM *p,BN_CTX *ctx);
 int     BN_mod_exp(BIGNUM *r, const BIGNUM *a, const BIGNUM *p, const BIGNUM *m,BN_CTX *ctx);
 BIGNUM* BN_mod_inverse(BIGNUM *ret, const BIGNUM *a, const BIGNUM *n,BN_CTX *ctx);
 
- int    BN_nnmod(BIGNUM *r, const BIGNUM *a, const BIGNUM *m, BN_CTX *ctx);
- int    BN_mod_add(BIGNUM *r, BIGNUM *a, BIGNUM *b, const BIGNUM *m,
-                        BN_CTX *ctx);
- int    BN_mod_sub(BIGNUM *r, BIGNUM *a, BIGNUM *b, const BIGNUM *m,
-                        BN_CTX *ctx);
- int    BN_mod_mul(BIGNUM *r, BIGNUM *a, BIGNUM *b, const BIGNUM *m,
-                        BN_CTX *ctx);
+int     BN_nnmod(BIGNUM *r, const BIGNUM *a, const BIGNUM *m, BN_CTX *ctx);
+int     BN_mod_add(BIGNUM *r, BIGNUM *a, BIGNUM *b, const BIGNUM *m,
+                   BN_CTX *ctx);
+int     BN_mod_sub(BIGNUM *r, BIGNUM *a, BIGNUM *b, const BIGNUM *m,
+                   BN_CTX *ctx);
+int     BN_mod_mul(BIGNUM *r, BIGNUM *a, BIGNUM *b, const BIGNUM *m,
+                   BN_CTX *ctx);
 
 int     bn_num_bytes(BIGNUM * a);
 int     BN_num_bits(const BIGNUM *a);
@@ -150,41 +140,16 @@ int     BN_rand_range(BIGNUM *rnd, const BIGNUM *range);
 
 
 int bn_is_odd(BIGNUM * a);
-// int BN_is_odd(const BIGNUM *a);
 
 
 int BN_is_bit_set(const BIGNUM *a, int n);
 
 
 /*
-
     EVP Ciphers
-
 */
 
-// typedef struct evp_cipher_st
-// {
-    // int nid;
-    // int block_size;
-    // int key_len; /* Default value for variable length ciphers */
-    // int iv_len;
-    // unsigned long flags; /* Various flags */
-    // ...;
-// } EVP_CIPHER;
 typedef ... EVP_CIPHER;
-
-// typedef struct evp_cipher_ctx_st
-// {
-    // const EVP_CIPHER *cipher;
-    // int encrypt; /* encrypt or decrypt */
-    // int buf_len; /* number we have left */
-    // int num; /* used by cfb/ofb/ctr mode */
-    // int key_len; /* May change for variable length cipher */
-    // unsigned long flags; /* Various flags */
-    // int final_used;
-    // int block_mask;
-    // ...;
-// } EVP_CIPHER_CTX;
 typedef ... EVP_CIPHER_CTX;
 
 const EVP_CIPHER * EVP_aes_128_gcm(void);
@@ -267,39 +232,26 @@ int setup_ssl_threads(void);
 
 // The HMAC interface
 
-
-// typedef struct { ...; } HMAC_CTX;
 typedef ... HMAC_CTX;
 typedef ... EVP_MD;
-
-// size_t hmac_ctx_size();
 
 int EVP_MD_size(const EVP_MD *md);
 int EVP_MD_block_size(const EVP_MD *md);
 const EVP_MD *EVP_get_digestbyname(const char *name);
 
 
- // void HMAC_CTX_init(HMAC_CTX *ctx);
- HMAC_CTX *HMAC_CTX_new(void);
- int HMAC_CTX_reset(HMAC_CTX *ctx);
+HMAC_CTX *HMAC_CTX_new(void);
+int HMAC_CTX_reset(HMAC_CTX *ctx);
 
- int HMAC_Init_ex(HMAC_CTX *ctx, const void *key, int key_len,
-                                     const EVP_MD *md, ENGINE *impl);
- int HMAC_Update(HMAC_CTX *ctx, const unsigned char *data, int len);
- int HMAC_Final(HMAC_CTX *ctx, unsigned char *md, unsigned int *len);
+int HMAC_Init_ex(HMAC_CTX *ctx, const void *key, int key_len,
+                 const EVP_MD *md, ENGINE *impl);
+int HMAC_Update(HMAC_CTX *ctx, const unsigned char *data, int len);
+int HMAC_Final(HMAC_CTX *ctx, unsigned char *md, unsigned int *len);
 
- void HMAC_CTX_free(HMAC_CTX *ctx);
- // void HMAC_CTX_cleanup(HMAC_CTX *ctx);
-
+void HMAC_CTX_free(HMAC_CTX *ctx);
 
 // The ECDSA interface
 
-
-// typedef struct ECDSA_SIG_st
-// {
-    // BIGNUM * r;
-    // BIGNUM * s;
-// } ECDSA_SIG;
 typedef ... ECDSA_SIG;
 
 void ECDSA_SIG_get0(const ECDSA_SIG *sig, const BIGNUM **pr, const BIGNUM **ps);
@@ -307,24 +259,22 @@ int ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s);
 
 typedef ... EC_KEY;
 
- ECDSA_SIG*     ECDSA_SIG_new(void);
- void           ECDSA_SIG_free(ECDSA_SIG *sig);
+ECDSA_SIG*     ECDSA_SIG_new(void);
+void           ECDSA_SIG_free(ECDSA_SIG *sig);
 
- ECDSA_SIG*     ECDSA_do_sign(const unsigned char *dgst, int dgst_len,
-                                                EC_KEY *eckey);
- int            ECDSA_do_verify(const unsigned char *dgst, int dgst_len,
-                                                const ECDSA_SIG *sig, EC_KEY* eckey);
- int            ECDSA_size(const EC_KEY *eckey);
+ECDSA_SIG*     ECDSA_do_sign(const unsigned char *dgst, int dgst_len,
+                             EC_KEY *eckey);
+int            ECDSA_do_verify(const unsigned char *dgst, int dgst_len,
+                               const ECDSA_SIG *sig, EC_KEY* eckey);
+int            ECDSA_size(const EC_KEY *eckey);
 
 
 ECDSA_SIG*     ECDSA_do_sign_ex(const unsigned char *dgst, int dgstlen,
-                        const BIGNUM *kinv, const BIGNUM *rp,
-                        EC_KEY *eckey);
+                                const BIGNUM *kinv, const BIGNUM *rp,
+                                EC_KEY *eckey);
 
- int            ECDSA_sign_setup(EC_KEY *eckey, BN_CTX *ctx,
+int            ECDSA_sign_setup(EC_KEY *eckey, BN_CTX *ctx,
                         BIGNUM **kinv, BIGNUM **rp);
-
-
 
 
 EC_KEY *EC_KEY_new(void);
