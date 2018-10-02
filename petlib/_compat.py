@@ -9,8 +9,8 @@ class OpenSSLVersion:
 
 def get_abi_lib():
     ffi = cffi.FFI()
-    ffi.cdef("unsigned long SSLeay();")
     ffi.cdef("unsigned long OpenSSL_version_num();")
+    ffi.cdef("unsigned long SSLeay();")
     lib = ffi.dlopen("crypto")
     return lib
 

@@ -4,6 +4,7 @@
 
 void OPENSSL_init(void);
 void OPENSSL_free(void*);
+unsigned long OpenSSL_version_num(void);
 
 // The constant-time compare functions
 int CRYPTO_memcmp(const void *a, const void *b, size_t len);
@@ -286,6 +287,7 @@ int EC_KEY_set_public_key(EC_KEY *key, const EC_POINT *pub);
 int EC_KEY_precompute_mult(EC_KEY *key, BN_CTX *ctx);
 
 #define SSLEAY_VERSION ...
+
 const char *SSLeay_version(int type);
 
 unsigned long ERR_get_error(void);

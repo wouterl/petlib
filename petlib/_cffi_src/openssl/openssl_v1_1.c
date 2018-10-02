@@ -10,6 +10,7 @@
 #include <openssl/x509_vfy.h>
 #include <openssl/crypto.h>
 #include <openssl/conf.h>
+#include <openssl/opensslv.h>
 
 
 #include <pythread.h>
